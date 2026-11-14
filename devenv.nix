@@ -25,9 +25,14 @@
        matplotlib
 
        xarray
+
        netcdf4
+       h5netcdf
+       h5py
+
        dask
        requests
+       earthaccess
      '';
    };
 }
