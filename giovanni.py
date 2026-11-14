@@ -20,7 +20,21 @@ REGIONS = {
     "orca": ("KM3NeT/ORCA site (off Toulon)", "5.6,42.4,6.4,42.95"),
     "arca": ("KM3NeT/ARCA site (off Capo Passero)", "15.6,35.8,16.6,36.7"),
     "medoc": ("Gulf of Lion deep-convection area", "4,41.5,6,42.5"),
+    # Garbage patches: the Great Pacific Garbage Patch (box as on Wikipedia), and the centres of the other subtropical
+    # gyres where floating debris accumulates (Maximenko et al. 2012, Mar. Pollut. Bull. 65, 51; Law et al. 2010,
+    # Science 329, 1185; Eriksen et al. 2013, Mar. Pollut. Bull. 68, 71)
+    "gpgp": ("Great Pacific Garbage Patch", "-155,35,-135,42"),
+    "north_atlantic_patch": ("North Atlantic garbage patch", "-70,25,-40,35"),
+    "south_pacific_patch": ("South Pacific garbage patch", "-115,-35,-95,-25"),
+    "south_atlantic_patch": ("South Atlantic garbage patch", "-20,-35,0,-25"),
+    "indian_ocean_patch": ("Indian Ocean garbage patch", "70,-35,90,-25"),
+    # Controls at the longitudes of the Great Pacific Garbage Patch: north of it (subpolar transition zone) and
+    # south of it (trade-wind belt)
+    "north_pacific_north": ("North Pacific, north of the patch", "-155,45,-135,52"),
+    "north_pacific_south": ("North Pacific, south of the patch", "-155,20,-135,27"),
 }
+PATCHES = ["gpgp", "north_atlantic_patch", "south_pacific_patch", "south_atlantic_patch", "indian_ocean_patch"]
+CONTROLS = ["north_pacific_north", "north_pacific_south"]
 
 SECONDS_PER_YEAR = 86400 * 365.25
 # Giovanni variable id -> (label, display unit, conversion from the native unit)
@@ -48,6 +62,30 @@ VARIABLES = {
     "MODISA_L3m_KD_Mo_4km_R2022_0_Kd_490": ("Diffuse attenuation at 490 nm (MODIS-Aqua)", "1/m", lambda x: x),
     "MODISA_L3m_POC_Mo_4km_R2022_0_poc": ("Particulate organic carbon (MODIS-Aqua)", "mg/m³", lambda x: x),
     "MODISA_L3m_NSST_Monthly_4km_R2019_0_sst": ("Sea-surface temperature, night (MODIS-Aqua)", "°C", lambda x: x),
+    "MODISA_L3m_NSST_Monthly_9km_R2019_0_sst": ("Sea-surface temperature, night (MODIS-Aqua)", "°C", lambda x: x),
+    "M2TMNXSLV_5_12_4_SLP": ("Sea-level pressure", "hPa", lambda x: x),  # Giovanni gives hPa, not the Pa of MERRA-2
+    "M2TMNXSLV_5_12_4_U10M": ("10 m eastward wind", "m/s", lambda x: x),
+    "M2TMNXSLV_5_12_4_V10M": ("10 m northward wind", "m/s", lambda x: x),
+    "M2TMNXOCN_5_12_4_TAUXWTR": ("Eastward wind stress over water", "mN/m²", lambda x: x * 1000),
+    "M2TMNXOCN_5_12_4_TAUYWTR": ("Northward wind stress over water", "mN/m²", lambda x: x * 1000),
+    "M2TMNXAER_5_12_4_SSEXTTAU": ("Sea-salt aerosol optical depth (550 nm)", "", lambda x: x),
+    "M2TMNXOCN_5_12_4_RAINOCN": ("Rainfall over the ocean", "mm/yr", lambda x: x * SECONDS_PER_YEAR),
+    "M2TMNXFLX_5_12_4_EVAP": ("Evaporation", "mm/yr", lambda x: x * SECONDS_PER_YEAR),
+    "MODISA_L3m_FLH_Mo_4km_R2022_0_nflh": ("Chlorophyll fluorescence line height (MODIS-Aqua)", "mW/m²/µm/sr",
+                                           lambda x: x * 1000),
+    "MODISA_L3m_PIC_Mo_4km_R2022_0_pic": ("Particulate inorganic carbon (calcite) (MODIS-Aqua)", "mmol/m³",
+                                          lambda x: x * 1000),
+    "MODISA_L3m_IOP_Mo_4km_R2022_0_adg_443": ("CDOM + detritus absorption at 443 nm (MODIS-Aqua)", "1/m", lambda x: x),
+    "MODISA_L3m_IOP_Mo_4km_R2022_0_aph_443": ("Phytoplankton absorption at 443 nm (MODIS-Aqua)", "1/m", lambda x: x),
+    "MODISA_L3m_IOP_Mo_4km_R2022_0_bbp_443": ("Particulate backscattering at 443 nm (MODIS-Aqua)", "1/m", lambda x: x),
+    "MODISA_L3m_PAR_Mo_4km_R2022_0_par": ("Photosynthetically available radiation (MODIS-Aqua)", "E/m²/day",
+                                          lambda x: x),
+    "NOBM_MON_R2017_h": ("Mixed-layer depth (NOBM model)", "m", lambda x: x),
+    "NOBM_MON_R2017_rno": ("Nitrate (NOBM model)", "µmol/L", lambda x: x),
+    "NOBM_MON_R2017_tot": ("Total chlorophyll (NOBM model)", "mg/m³", lambda x: x),
+    "NOBM_MON_R2017_dia": ("Diatoms (NOBM model)", "mg chl/m³", lambda x: x),
+    "NOBM_MON_R2017_cya": ("Cyanobacteria (NOBM model)", "mg chl/m³", lambda x: x),
+    "NOBM_MON_R2017_coc": ("Coccolithophores (NOBM model)", "mg chl/m³", lambda x: x),
 }
 
 
@@ -67,7 +105,7 @@ def load_series(region, variable):
     # end of the previous month (e.g. July 2006 at 2006-06-30): round to the nearest month start
     month = (df["time"] + pd.Timedelta(days=15)).dt.to_period("M").dt.to_timestamp()
     s = pd.Series(x.values, index=month)
-    s = s[s.abs() < 1e14].dropna()  # fill value 1e15
+    s = s[(s.abs() < 1e14) & (s != -32767)].dropna()  # fill values 1e15 (MERRA-2) and -32767 (MODIS)
     if "TSKINWTR" in variable:
         # 1980-05 and 1980-11 are ~10 K below their neighbours in every region in the Giovanni output: not physical
         s = s.drop(pd.to_datetime(["1980-05-01", "1980-11-01"]), errors="ignore")
