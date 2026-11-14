@@ -1,7 +1,8 @@
 .devenv
 .direnv
-__pycache__
+__pycache__/
 devenv.lock
 .envrc
 data/skin_temp
 .idea
+.venv/

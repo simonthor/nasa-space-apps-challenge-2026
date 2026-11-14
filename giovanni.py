@@ -1,0 +1,119 @@
+"""Loading and linear-trend fitting of the Giovanni "Time Series, Area-Averaged" CSVs in data/giovanni/.
+
+Files are data/giovanni/<region>/<variable>.csv (fetched by fetch_all.sh); files directly in
+data/giovanni/ are global averages.
+"""
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from scipy import stats
+
+DATA = Path(__file__).parent / "data" / "giovanni"
+
+# Region -> (label, bounding box W,S,E,N as passed to Giovanni)
+REGIONS = {
+    "global": ("Global", "-180,-90,180,90"),
+    "south_pole": ("South Pole (IceCube)", "-180,-90,180,-89"),
+    "antarctic_sea_ice": ("Antarctic sea-ice zone", "-180,-75,180,-55"),
+    "mediterranean": ("Mediterranean Sea", "-5,30,36,46"),
+    "orca": ("KM3NeT/ORCA site (off Toulon)", "5.6,42.4,6.4,42.95"),
+    "arca": ("KM3NeT/ARCA site (off Capo Passero)", "15.6,35.8,16.6,36.7"),
+    "medoc": ("Gulf of Lion deep-convection area", "4,41.5,6,42.5"),
+}
+
+SECONDS_PER_YEAR = 86400 * 365.25
+# Giovanni variable id -> (label, display unit, conversion from the native unit)
+VARIABLES = {
+    "M2TMNXSLV_5_12_4_T2M": ("2 m air temperature", "°C", lambda x: x - 273.15),
+    "M2TMNXSLV_5_12_4_T10M": ("10 m air temperature", "°C", lambda x: x - 273.15),
+    "M2IMNPASM_5_12_4_T(z=10)": ("Air temperature at 10 hPa", "°C", lambda x: x - 273.15),
+    "M2IMNPASM_5_12_4_T(z=50)": ("Air temperature at 50 hPa", "°C", lambda x: x - 273.15),
+    "M2IMNPASM_5_12_4_T(z=100)": ("Air temperature at 100 hPa", "°C", lambda x: x - 273.15),
+    "M2IMNPASM_5_12_4_T(z=500)": ("Air temperature at 500 hPa", "°C", lambda x: x - 273.15),
+    "M2TMNXSLV_5_12_4_PS": ("Surface pressure", "hPa", lambda x: x),
+    "M2TMNXSLV_5_12_4_TQV": ("Total precipitable water vapour", "mm", lambda x: x),
+    "M2TMNXSLV_5_12_4_TO3": ("Total column ozone", "DU", lambda x: x),
+    "M2TMNXFLX_5_12_4_PRECSNO": ("Snowfall", "mm water eq./yr", lambda x: x * SECONDS_PER_YEAR),
+    "M2TMNXFLX_5_12_4_PRECTOTCORR": ("Precipitation", "mm/yr", lambda x: x * SECONDS_PER_YEAR),
+    "M2TMNXFLX_5_12_4_SPEED": ("Surface wind speed", "m/s", lambda x: x),
+    "M2TMNXRAD_5_12_4_CLDTOT": ("Total cloud fraction", "%", lambda x: x * 100),
+    "M2TMNXAER_5_12_4_TOTEXTTAU": ("Aerosol optical depth (550 nm)", "", lambda x: x),
+    "M2TMNXAER_5_12_4_DUEXTTAU": ("Dust aerosol optical depth (550 nm)", "", lambda x: x),
+    "M2TMNXADG_5_12_4_DUDP003": ("Dust dry deposition (bin 3)", "mg/m²/yr", lambda x: x * 1e6 * SECONDS_PER_YEAR),
+    "M2TMNXADG_5_12_4_DUWT003": ("Dust wet deposition (bin 3)", "mg/m²/yr", lambda x: x * 1e6 * SECONDS_PER_YEAR),
+    "M2TMNXOCN_5_12_4_TSKINWTR": ("Sea-surface skin temperature (MERRA-2)", "°C", lambda x: x - 273.15),
+    "M2TMNXOCN_5_12_4_FRSEAICE": ("Sea-ice fraction", "%", lambda x: x * 100),
+    "MODISA_L3m_CHL_Mo_4km_R2022_0_chlor_a": ("Chlorophyll-a (MODIS-Aqua)", "mg/m³", lambda x: x),
+    "MODISA_L3m_KD_Mo_4km_R2022_0_Kd_490": ("Diffuse attenuation at 490 nm (MODIS-Aqua)", "1/m", lambda x: x),
+    "MODISA_L3m_POC_Mo_4km_R2022_0_poc": ("Particulate organic carbon (MODIS-Aqua)", "mg/m³", lambda x: x),
+    "MODISA_L3m_NSST_Monthly_4km_R2019_0_sst": ("Sea-surface temperature, night (MODIS-Aqua)", "°C", lambda x: x),
+}
+
+
+def file_name(variable):
+    """Giovanni variable id -> CSV file stem, as written by giovanni_fetch.sh."""
+    return "".join(c if c.isalnum() or c == "_" else "_" for c in variable)
+
+
+def load_series(region, variable):
+    """Monthly series in display units, indexed by the first day of the month."""
+    folder = DATA if region == "global" else DATA / region
+    # 7 metadata lines and a blank line precede the "time, value" header
+    df = pd.read_csv(folder / f"{file_name(variable)}.csv", skiprows=8, names=["time", "x"], header=0,
+                     parse_dates=["time"])
+    x = pd.to_numeric(df["x"], errors="coerce")
+    # Months are stamped at their start, except the MODIS SST months up to 2021-11, which are stamped at the
+    # end of the previous month (e.g. July 2006 at 2006-06-30): round to the nearest month start
+    month = (df["time"] + pd.Timedelta(days=15)).dt.to_period("M").dt.to_timestamp()
+    s = pd.Series(x.values, index=month)
+    s = s[s.abs() < 1e14].dropna()  # fill value 1e15
+    if "TSKINWTR" in variable:
+        # 1980-05 and 1980-11 are ~10 K below their neighbours in every region in the Giovanni output: not physical
+        s = s.drop(pd.to_datetime(["1980-05-01", "1980-11-01"]), errors="ignore")
+    return VARIABLES[variable][2](s)
+
+
+def decimal_year(index):
+    return index.year + (index.month - 0.5) / 12
+
+
+def fit_trend(s):
+    """OLS trend of the deseasonalised anomaly (monthly climatology removed).
+
+    Significance uses the lag-1 autocorrelation correction of the effective sample size,
+    n_eff = n (1 - r1) / (1 + r1) (Santer et al. 2000, JGR 105, 7337). Mann-Kendall test and
+    Theil-Sen slope are computed on complete-year annual means.
+    """
+    anomaly = s - s.groupby(s.index.month).transform("mean")
+    t = decimal_year(s.index)
+    fit = stats.linregress(t, anomaly.values)
+    residual = anomaly.values - (fit.intercept + fit.slope * t)
+    r1 = max(np.corrcoef(residual[:-1], residual[1:])[0, 1], 0)
+    n_eff = len(s) * (1 - r1) / (1 + r1)
+    stderr = fit.stderr * np.sqrt((len(s) - 2) / (n_eff - 2))
+    p = 2 * stats.t.sf(abs(fit.slope / stderr), n_eff - 2)
+
+    counts = s.groupby(s.index.year).count()
+    annual = s.groupby(s.index.year).mean()[counts == 12]
+    tau, p_mk = stats.kendalltau(annual.index, annual.values)
+
+    monthly_slope, monthly_p = {}, {}
+    for month, g in s.groupby(s.index.month):
+        m_fit = stats.linregress(g.index.year, g.values)
+        monthly_slope[month], monthly_p[month] = m_fit.slope * 10, m_fit.pvalue
+    return dict(anomaly=anomaly, intercept=fit.intercept, slope_per_decade=fit.slope * 10,
+                ci95_per_decade=stats.t.ppf(0.975, n_eff - 2) * stderr * 10, p_ols_ar1=p, r1=r1, n_eff=n_eff,
+                mk_tau=tau, p_mk=p_mk, sen_per_decade=stats.theilslopes(annual.values, annual.index)[0] * 10,
+                monthly_slope=monthly_slope, monthly_p=monthly_p)
+
+
+def annual_trend(s, first_year, last_year, months=None):
+    """OLS and Mann-Kendall trend of the yearly mean over [first_year, last_year], optionally of some months only."""
+    s = s[(s.index.year >= first_year) & (s.index.year <= last_year)]
+    if months:
+        s = s[s.index.month.isin(months)]
+    yearly = s.groupby(s.index.year).mean()
+    fit = stats.linregress(yearly.index, yearly.values)
+    return dict(yearly=yearly, intercept=fit.intercept, slope_per_decade=fit.slope * 10, p_ols=fit.pvalue,
+                p_mk=stats.kendalltau(yearly.index, yearly.values)[1])
