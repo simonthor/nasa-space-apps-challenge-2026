@@ -1,0 +1,19 @@
+[project]
+name = "nasa-space-apps-challenge-2026"
+version = "0.1.0"
+description = "Earth System Trend Detective: trends in NASA Earth science data at the Great Pacific Garbage Patch and other ocean garbage patches"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dask",
+    "matplotlib",
+    "netcdf4",
+    "numpy",
+    "pandas",
+    "requests",
+    "scipy",
+    "xarray",
+]
+
+[tool.uv]
+package = false
