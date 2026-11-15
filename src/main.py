@@ -1,7 +1,5 @@
-from import_files.earth_access_data import NasaDataDownloader
-from import_files.import_nc import inspect_nc
+from import_files.extract_regions_from_geojson import extract_regions_from_cache, extract_regions_from_cache_large
 
-from plot_data.plot_data import plot_netcdf_timeseries
 
 def test_name():
     import earthaccess
@@ -23,27 +21,18 @@ def test_name():
 
 
 if __name__ == "__main__":
-    # test_name()
-    # downloader = NasaDataDownloader(cache_dir="../data/.cache_nasa", keep_cache=True)
-    #
-    # lat_region = (25.0, 35.0)
-    # lon_region = (-145.0, -135.0)
-    #
-    # out_file = "../data/reflectance_monthly2023.nc"
-    #
-    # ds_salinity = downloader.fetch(
-    #     param_key="reflectance_monthly",
+    # extract_regions_from_cache_large(
+    #     geojson_path="../data/coordinates/ocean_means.geojson",
+    #     cache_root="../data/.cache_nasa",
+    #     output_root="../data/regions_2",
     #     start_date="2001-01-01",
-    #     end_date="2024-12-31",
-    #     lat_bounds=lat_region,
-    #     lon_bounds=lon_region,
-    #     output_path=out_file,
+    #     end_date="2025-12-31",
     # )
-    #
-    # inspect_nc(out_file)
-    # plot_reflectance("../data/reflectance_monthly2023.nc")
-
-    plot_netcdf_timeseries(
-        nc_path="../data/chlorophyll_data2023.nc",
-        output_dir="../output/chlorophyll",
+    extract_regions_from_cache(
+        geojson_path="../data/coordinates/garbage_patches.geojson",
+        cache_root="../data/.cache_nasa",
+        output_root="../data/regions",
+        params=["microplastic_daily"],
+        start_date="2001-01-01",
+        end_date="2025-12-31",
     )
