@@ -6,7 +6,7 @@ trend the same way in all of them.
 """
 import pandas as pd
 
-from giovanni import CONTROLS, DATA, PATCHES, VARIABLES, file_name, fit_trend, load_series
+from giovanni import CONTROLS, DATA, PATCHES, VARIABLES, file_name, fit_trend, load_ocean_series, load_series
 
 rows = []
 for region in PATCHES + CONTROLS:
@@ -43,3 +43,26 @@ for column in ["mean", "trend"]:
         [r for r in PATCHES + CONTROLS if r in summary.region.unique()]]
     print(f"\n{column}:")
     print(table.to_string(float_format=lambda v: f"{v:.3g}"))
+
+print("\nThe patch compared with the Pacific Ocean and global means (common period of the three series). Trends per "
+      "decade, in °C for temperature and in % of each region's mean otherwise; the differences are the trends of the "
+      "difference series, with their AR(1)-corrected p-values:")
+for variable in ["M2TMNXOCN_5_12_4_TSKINWTR", "MODISA_L3m_CHL_Mo_4km_R2022_0_chlor_a",
+                 "MODISA_L3m_FLH_Mo_4km_R2022_0_nflh", "MODISA_L3m_POC_Mo_4km_R2022_0_poc",
+                 "MODISA_L3m_KD_Mo_4km_R2022_0_Kd_490", "M2TMNXOCN_5_12_4_RAINOCN"]:
+    label, unit, _ = VARIABLES[variable]
+    try:
+        series = pd.concat([load_series("gpgp", variable), load_ocean_series("pacific", variable),
+                            load_series("global", variable)], axis=1, keys=["gpgp", "pacific", "global"]).dropna()
+    except FileNotFoundError as missing:
+        print(f"  {label}: not downloaded yet ({missing.filename})")
+        continue
+    if unit != "°C":
+        series = series / series.mean() * 100
+    fits = {region: fit_trend(series[region]) for region in series}
+    text = ", ".join(f"{region} {fit['slope_per_decade']:+.2f} (p={fit['p_ols_ar1']:.2g})"
+                     for region, fit in fits.items())
+    for other in ["pacific", "global"]:
+        difference = fit_trend(series["gpgp"] - series[other])
+        text += f"; gpgp-{other} {difference['slope_per_decade']:+.2f} (p={difference['p_ols_ar1']:.2g})"
+    print(f"  {label} [{'°C' if unit == '°C' else '%'}], {series.index[0]:%Y-%m} to {series.index[-1]:%Y-%m}: {text}")

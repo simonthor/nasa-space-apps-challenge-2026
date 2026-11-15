@@ -14,6 +14,7 @@ DECK = REPO / "Great Pacific Garbage Patch Trends.pptx"
 DECKCRAFT = ["flatpak", "run", "--user", f"--filesystem={REPO}", "--command=deckcraft-cli", "ai.storyteller.deckcraft"]
 TEMPLATE_SLIDES = 17
 TITLE, CARDS2, CARDS4, FIGURE, NEXT = 0, 1, 2, 3, 16
+CARD_HEADING = "Area averages from NASA Giovanni"  # first card of the CARDS4 template slide
 
 slides = [
     (TITLE, {
@@ -153,39 +154,49 @@ slides = [
      "strips are downloaded."),
 ]
 
-DECK.write_bytes(subprocess.run(["git", "show", "neutrino-sites:Neutrino Sites Trends.pptx"], cwd=REPO,
-                                capture_output=True, check=True).stdout)
-command_file = REPO / ".deckcraft_commands.txt"
+
+def build(deck, slides):
+    """Copy the template deck to deck, add slides = [(template slide, {shape id: text}, picture or None, notes)] and
+    delete the template slides."""
+    deck.write_bytes(subprocess.run(["git", "show", "neutrino-sites:Neutrino Sites Trends.pptx"], cwd=REPO,
+                                    capture_output=True, check=True).stdout)
+    command_file = REPO / ".deckcraft_commands.txt"
+
+    def run(commands):
+        """Run DeckCraft commands on the deck and save it; the answers of the commands."""
+        command_file.write_text("".join(f"{name}={json.dumps(args, ensure_ascii=False)}\n" for name, args in commands))
+        out = subprocess.run(DECKCRAFT + ["run", "--in", deck, "--cmd-file", command_file, "--save", deck, "--print"],
+                             capture_output=True, text=True, check=True).stdout
+        return [line for line in out.splitlines() if " → " in line]
+
+    for k, (template, texts, picture, notes) in enumerate(slides):
+        index = TEMPLATE_SLIDES + k
+        duplicated = run([("slide.duplicate", {"index": template}),
+                          ("slide.move", {"from": template + 1, "to": index})])
+        slide_id = json.loads(duplicated[0].split(" → ", 1)[1])["ids"][0]
+        offset = slide_id - 1  # the shape ids of a duplicated slide follow its slide id
+        commands = [("slide.go", {"index": index})]
+        # no line break between a number and its unit
+        commands += [("text.set", {"id": offset + shape_id, "text": text.replace(" %", "\u00a0%")})
+                     for shape_id, text in texts.items()]
+        if picture:
+            ids = [offset + 5]
+            commands += [("picture.change", {"path": PLOTS + picture, "ids": ids}), ("picture.reset", {"ids": ids}),
+                         ("shape.sizePosition", {"x": 64, "y": 149, "w": 832, "h": 339, "ids": ids}),
+                         ("shape.altText", {"text": texts[3], "ids": ids})]
+        if template == CARDS4:
+            # the template's card bodies differ in height, and a short one gets its text shrunk: all fill the card
+            commands.append(("shape.sizePosition", {"h": 105, "ids": [offset + i for i in (7, 11, 15, 19)]}))
+        if template == CARDS4 and texts.get(6, CARD_HEADING) != CARD_HEADING:
+            # the template's first card has a three-line heading; with another heading its body moves up
+            commands.append(("shape.sizePosition", {"y": 237, "ids": [offset + 7]}))
+        commands.append(("slide.notes", {"text": notes, "index": index}))
+        run(commands)
+        print(index, texts.get(3, ""))
+    run([("slide.delete", {"index": 0})] * TEMPLATE_SLIDES)
+    command_file.unlink()
+    print(deck)
 
 
-def run(commands):
-    """Run DeckCraft commands on the deck and save it; the answers of the commands."""
-    command_file.write_text("".join(f"{name}={json.dumps(args, ensure_ascii=False)}\n" for name, args in commands))
-    out = subprocess.run(DECKCRAFT + ["run", "--in", DECK, "--cmd-file", command_file, "--save", DECK, "--print"],
-                         capture_output=True, text=True, check=True).stdout
-    return [line for line in out.splitlines() if " → " in line]
-
-
-for k, (template, texts, picture, notes) in enumerate(slides):
-    index = TEMPLATE_SLIDES + k
-    duplicated = run([("slide.duplicate", {"index": template}), ("slide.move", {"from": template + 1, "to": index})])
-    slide_id = json.loads(duplicated[0].split(" → ", 1)[1])["ids"][0]
-    offset = slide_id - 1  # the shape ids of a duplicated slide follow its slide id
-    commands = [("slide.go", {"index": index})]
-    # no line break between a number and its unit
-    commands += [("text.set", {"id": offset + shape_id, "text": text.replace(" %", "\u00a0%")})
-                 for shape_id, text in texts.items()]
-    if picture:
-        ids = [offset + 5]
-        commands += [("picture.change", {"path": PLOTS + picture, "ids": ids}), ("picture.reset", {"ids": ids}),
-                     ("shape.sizePosition", {"x": 64, "y": 149, "w": 832, "h": 339, "ids": ids}),
-                     ("shape.altText", {"text": texts[3], "ids": ids})]
-    if texts.get(2) == "SUMMARY":
-        # the method slide's first card has a three-line heading; here it has two, so its body moves up
-        commands.append(("shape.sizePosition", {"y": 237, "ids": [offset + 7]}))
-    commands.append(("slide.notes", {"text": notes, "index": index}))
-    run(commands)
-    print(index, texts.get(3, ""))
-run([("slide.delete", {"index": 0})] * TEMPLATE_SLIDES)
-command_file.unlink()
-print(DECK)
+if __name__ == "__main__":
+    build(DECK, slides)

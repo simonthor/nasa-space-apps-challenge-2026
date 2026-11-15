@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 PLOTS = Path(__file__).parent / "plots"
 BACKGROUND, INK, INK_SECONDARY, GRID = "#f7f6f2", "#1d1c1a", "#52514e", "#e4e3df"
 BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
+PURPLE = "#7b5ea7"  # ocean means
 MONTHS = "JFMAMJJASOND"
 plt.rcParams.update({
     "font.size": 15, "axes.titlesize": 16, "axes.titleweight": "bold", "axes.titlelocation": "left",
@@ -14,7 +15,7 @@ plt.rcParams.update({
     "axes.facecolor": BACKGROUND, "legend.frameon": False, "savefig.facecolor": BACKGROUND,
 })
 SLIDE_SIZE = (13.87, 5.65)  # inches; at 120 dpi 1664 px wide: the 832 x 339 pt figure area of the slides
-SHORT_NAMES = {"gpgp": "Great Pacific", "north_atlantic_patch": "North Atlantic",
+SHORT_NAMES = {"gpgp": "Great Pacific", "gpgp_model": "Great Pacific", "north_atlantic_patch": "North Atlantic",
                "south_pacific_patch": "South Pacific", "south_atlantic_patch": "South Atlantic",
                "indian_ocean_patch": "Indian Ocean",
                "north_pacific_north": "N. Pacific, north\n(control)",

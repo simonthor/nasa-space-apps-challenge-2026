@@ -48,3 +48,6 @@ For data and resources related to this challenge, refer to the Resources tab at 
 ## Python library for data download
 `earthaccess`
 
+
+## TODO
+What could the reason be that a clear trend is seen in the GPGP but not in the other patches?

@@ -41,8 +41,13 @@ for _ in $(seq 1 60); do
     percent=${status%%|*}; url=${status##*|}
     if [ "$percent" = 100 ] && [ -n "$url" ]; then
       if [ "$service" = ArAvTs ]; then
-        js "async () => await (await fetch('/giovanni/$url')).text()" > "$csv"
-        echo "ok $csv ($(wc -l < "$csv") lines)"; exit 0
+        # an empty reply (browser busy) is retried; only a CSV with the time column is kept
+        for _ in $(seq 1 10); do
+          js "async () => await (await fetch('/giovanni/$url')).text()" > "$csv.part" 2> /dev/null || true
+          grep -q "^time" "$csv.part" && { mv "$csv.part" "$csv"; echo "ok $csv ($(wc -l < "$csv") lines)"; exit 0; }
+          sleep 5
+        done
+        rm -f "$csv.part"; echo "FAILED $variable: no time series in the reply from $url"; exit 1
       fi
       # binary NetCDF: passed out of the browser as base64; the map links are not relative to /giovanni/ as the CSV ones
       js "async () => { const blob = await (await fetch(new URL('$url', location.origin + '/giovanni/'))).blob();
