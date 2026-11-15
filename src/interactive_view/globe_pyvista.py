@@ -9,8 +9,7 @@ import pyvista as pv
 import xarray as xr
 
 PREVIEW_DIR = Path("../../data/preview")
-GEOJSON_PATH = Path("../../data/coordinates/garbage_patches.geojson")  # Укажите путь к вашему GeoJSON-файлу
-
+GEOJSON_PATH = Path("../../data/coordinates/garbage_patches.geojson")
 # Use standard matplotlib colormaps (do not require cmocean)
 DATASETS = [
     ("chlorophyll_monthly", "Chlorophyll (Chl-a)", "viridis", True),

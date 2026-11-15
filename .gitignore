@@ -7,3 +7,6 @@ data/skin_temp
 .idea
 .venv/
 data/.cache_nasa
+data/*.nc
+data/preview/
+data/regions/

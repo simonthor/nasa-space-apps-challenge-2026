@@ -68,7 +68,6 @@ class NetCDFNormalizer:
         units: dict[str, str] | None = None,
         attrs: dict[str, str] | None = None,
     ) -> xr.Dataset:
-        """Нормализует список файлов по одному и склеивает их в единый временной ряд."""
         slices: list[xr.Dataset] = []
         for fpath in sorted(file_paths):
             normalized = self.normalize_file(

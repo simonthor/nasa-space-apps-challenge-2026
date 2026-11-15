@@ -34,7 +34,7 @@ DATASET_REGISTRY = {
     },
 
     "microplastic_daily": {
-        "short_name": "CYGNSS_L3_MICROPLASTIC_V1.0",  # или CYGNSS_L3_MICROPLASTIC_V3.2
+        "short_name": "CYGNSS_L3_MICROPLASTIC_V1.0",  # or CYGNSS_L3_MICROPLASTIC_V3.2
         "vars": ["MP_concentration"],
         "units": {"MP_concentration": "count/km^2"},
         "global_granules": True,

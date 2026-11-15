@@ -1,0 +1,293 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "pacific_northwest",
+        "label": "Pacific Ocean, 120°E-180°, 10°S-60°N",
+        "role": "ocean mean",
+        "ocean": "pacific"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              120,
+              -10
+            ],
+            [
+              180,
+              -10
+            ],
+            [
+              180,
+              60
+            ],
+            [
+              120,
+              60
+            ],
+            [
+              120,
+              -10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "pacific_southwest",
+        "label": "Pacific Ocean, 150°E-180°, 60°S-10°S",
+        "role": "ocean mean",
+        "ocean": "pacific"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              150,
+              -60
+            ],
+            [
+              180,
+              -60
+            ],
+            [
+              180,
+              -10
+            ],
+            [
+              150,
+              -10
+            ],
+            [
+              150,
+              -60
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "pacific_east",
+        "label": "Pacific Ocean, 180°-100°W, 60°S-60°N",
+        "role": "ocean mean",
+        "ocean": "pacific"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -180,
+              -60
+            ],
+            [
+              -100,
+              -60
+            ],
+            [
+              -100,
+              60
+            ],
+            [
+              -180,
+              60
+            ],
+            [
+              -180,
+              -60
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "pacific_southeast",
+        "label": "Pacific Ocean, 100°W-70°W, 60°S-8°N",
+        "role": "ocean mean",
+        "ocean": "pacific"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -100,
+              -60
+            ],
+            [
+              -70,
+              -60
+            ],
+            [
+              -70,
+              8
+            ],
+            [
+              -100,
+              8
+            ],
+            [
+              -100,
+              -60
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "atlantic_north",
+        "label": "Atlantic Ocean, 75°W-10°W, 0-60°N",
+        "role": "ocean mean",
+        "ocean": "atlantic"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -75,
+              0
+            ],
+            [
+              -10,
+              0
+            ],
+            [
+              -10,
+              60
+            ],
+            [
+              -75,
+              60
+            ],
+            [
+              -75,
+              0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "atlantic_south",
+        "label": "Atlantic Ocean, 65°W-20°E, 60°S-0",
+        "role": "ocean mean",
+        "ocean": "atlantic"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -65,
+              -60
+            ],
+            [
+              20,
+              -60
+            ],
+            [
+              20,
+              0
+            ],
+            [
+              -65,
+              0
+            ],
+            [
+              -65,
+              -60
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "indian_west",
+        "label": "Indian Ocean, 20°E-100°E, 60°S-25°N",
+        "role": "ocean mean",
+        "ocean": "indian"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              20,
+              -60
+            ],
+            [
+              100,
+              -60
+            ],
+            [
+              100,
+              25
+            ],
+            [
+              20,
+              25
+            ],
+            [
+              20,
+              -60
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "indian_east",
+        "label": "Indian Ocean, 100°E-142°E, 60°S-10°S",
+        "role": "ocean mean",
+        "ocean": "indian"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              100,
+              -60
+            ],
+            [
+              142,
+              -60
+            ],
+            [
+              142,
+              -10
+            ],
+            [
+              100,
+              -10
+            ],
+            [
+              100,
+              -60
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -21,8 +21,8 @@ def plot_netcdf_timeseries(
             var_name = list(ds.data_vars)[0]
         if var_name not in ds.data_vars:
             raise ValueError(
-                f"Переменная '{var_name}' не найдена в {nc_path}. "
-                f"Доступные: {list(ds.data_vars)}"
+                f"Variable '{var_name}' not found in {nc_path}. "
+                f"Available: {list(ds.data_vars)}"
             )
 
         da = ds[var_name]

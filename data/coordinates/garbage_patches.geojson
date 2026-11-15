@@ -1,0 +1,653 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "gpgp",
+        "label": "Great Pacific Garbage Patch",
+        "role": "patch",
+        "patch": "gpgp"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -155,
+              35
+            ],
+            [
+              -135,
+              35
+            ],
+            [
+              -135,
+              42
+            ],
+            [
+              -155,
+              42
+            ],
+            [
+              -155,
+              35
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "north_pacific_north",
+        "label": "North Pacific, north of the patch",
+        "role": "control north",
+        "patch": "gpgp"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -155,
+              45
+            ],
+            [
+              -135,
+              45
+            ],
+            [
+              -135,
+              52
+            ],
+            [
+              -155,
+              52
+            ],
+            [
+              -155,
+              45
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "north_pacific_south",
+        "label": "North Pacific, south of the patch",
+        "role": "control south",
+        "patch": "gpgp"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -155,
+              20
+            ],
+            [
+              -135,
+              20
+            ],
+            [
+              -135,
+              27
+            ],
+            [
+              -155,
+              27
+            ],
+            [
+              -155,
+              20
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "north_atlantic_patch",
+        "label": "North Atlantic garbage patch",
+        "role": "patch",
+        "patch": "north_atlantic_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -70,
+              25
+            ],
+            [
+              -40,
+              25
+            ],
+            [
+              -40,
+              35
+            ],
+            [
+              -70,
+              35
+            ],
+            [
+              -70,
+              25
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "north_atlantic_north",
+        "label": "North Atlantic, north of the patch",
+        "role": "control north",
+        "patch": "north_atlantic_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -70,
+              40
+            ],
+            [
+              -40,
+              40
+            ],
+            [
+              -40,
+              50
+            ],
+            [
+              -70,
+              50
+            ],
+            [
+              -70,
+              40
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "north_atlantic_south",
+        "label": "North Atlantic, south of the patch",
+        "role": "control south",
+        "patch": "north_atlantic_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -70,
+              10
+            ],
+            [
+              -40,
+              10
+            ],
+            [
+              -40,
+              20
+            ],
+            [
+              -70,
+              20
+            ],
+            [
+              -70,
+              10
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "south_pacific_patch",
+        "label": "South Pacific garbage patch",
+        "role": "patch",
+        "patch": "south_pacific_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -115,
+              -35
+            ],
+            [
+              -95,
+              -35
+            ],
+            [
+              -95,
+              -25
+            ],
+            [
+              -115,
+              -25
+            ],
+            [
+              -115,
+              -35
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "south_pacific_north",
+        "label": "South Pacific, north of the patch",
+        "role": "control north",
+        "patch": "south_pacific_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -115,
+              -20
+            ],
+            [
+              -95,
+              -20
+            ],
+            [
+              -95,
+              -10
+            ],
+            [
+              -115,
+              -10
+            ],
+            [
+              -115,
+              -20
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "south_pacific_south",
+        "label": "South Pacific, south of the patch",
+        "role": "control south",
+        "patch": "south_pacific_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -115,
+              -50
+            ],
+            [
+              -95,
+              -50
+            ],
+            [
+              -95,
+              -40
+            ],
+            [
+              -115,
+              -40
+            ],
+            [
+              -115,
+              -50
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "south_atlantic_patch",
+        "label": "South Atlantic garbage patch",
+        "role": "patch",
+        "patch": "south_atlantic_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -20,
+              -35
+            ],
+            [
+              0,
+              -35
+            ],
+            [
+              0,
+              -25
+            ],
+            [
+              -20,
+              -25
+            ],
+            [
+              -20,
+              -35
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "south_atlantic_north",
+        "label": "South Atlantic, north of the patch",
+        "role": "control north",
+        "patch": "south_atlantic_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -20,
+              -20
+            ],
+            [
+              0,
+              -20
+            ],
+            [
+              0,
+              -10
+            ],
+            [
+              -20,
+              -10
+            ],
+            [
+              -20,
+              -20
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "south_atlantic_south",
+        "label": "South Atlantic, south of the patch",
+        "role": "control south",
+        "patch": "south_atlantic_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -20,
+              -50
+            ],
+            [
+              0,
+              -50
+            ],
+            [
+              0,
+              -40
+            ],
+            [
+              -20,
+              -40
+            ],
+            [
+              -20,
+              -50
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "indian_ocean_patch",
+        "label": "Indian Ocean garbage patch",
+        "role": "patch",
+        "patch": "indian_ocean_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              70,
+              -35
+            ],
+            [
+              90,
+              -35
+            ],
+            [
+              90,
+              -25
+            ],
+            [
+              70,
+              -25
+            ],
+            [
+              70,
+              -35
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "indian_ocean_north",
+        "label": "Indian Ocean, north of the patch",
+        "role": "control north",
+        "patch": "indian_ocean_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              70,
+              -20
+            ],
+            [
+              90,
+              -20
+            ],
+            [
+              90,
+              -10
+            ],
+            [
+              70,
+              -10
+            ],
+            [
+              70,
+              -20
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "indian_ocean_south",
+        "label": "Indian Ocean, south of the patch",
+        "role": "control south",
+        "patch": "indian_ocean_patch"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              70,
+              -50
+            ],
+            [
+              90,
+              -50
+            ],
+            [
+              90,
+              -40
+            ],
+            [
+              70,
+              -40
+            ],
+            [
+              70,
+              -50
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "gpgp_model",
+        "label": "Great Pacific Garbage Patch, model maximum",
+        "role": "patch",
+        "patch": "gpgp_model"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -151,
+              28
+            ],
+            [
+              -131,
+              28
+            ],
+            [
+              -131,
+              38
+            ],
+            [
+              -151,
+              38
+            ],
+            [
+              -151,
+              28
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "gpgp_model_north",
+        "label": "North Pacific, north of the model patch",
+        "role": "control north",
+        "patch": "gpgp_model"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -151,
+              43
+            ],
+            [
+              -131,
+              43
+            ],
+            [
+              -131,
+              53
+            ],
+            [
+              -151,
+              53
+            ],
+            [
+              -151,
+              43
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "gpgp_model_south",
+        "label": "North Pacific, south of the model patch",
+        "role": "control south",
+        "patch": "gpgp_model"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -151,
+              13
+            ],
+            [
+              -131,
+              13
+            ],
+            [
+              -131,
+              23
+            ],
+            [
+              -151,
+              23
+            ],
+            [
+              -151,
+              13
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
