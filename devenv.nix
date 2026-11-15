@@ -41,7 +41,6 @@ in {
     enable = true;
     package = pkgs.python311;
     venv.enable = true;
-    # Важно: именно этот список пробрасывается в LD_LIBRARY_PATH для pip-колес (VTK/PyVista)
     libraries = x11AndGpuLibs;
     venv.requirements = ''
       numpy
