@@ -7,13 +7,6 @@ import xarray as xr
 
 
 class NetCDFNormalizer:
-    """Приводит разнородные сеточные NetCDF-гранулы (L3/L4) к единому каноническому виду:
-    - измерения: (time, lat, lon)
-    - lat: float64, строго по возрастанию
-    - lon: float64, в диапазоне [-180, 180], строго по возрастанию
-    - time: timezone-naive datetime64[ns], без дубликатов, отсортировано
-    """
-
     LAT_ALIASES = ("latitude", "Latitude", "LAT", "y")
     LON_ALIASES = ("longitude", "Longitude", "LON", "x")
     TIME_ATTR_ALIASES = (
@@ -33,7 +26,6 @@ class NetCDFNormalizer:
         lat_bounds: tuple[float, float],
         lon_bounds: tuple[float, float],
     ) -> xr.Dataset | None:
-        """Открывает один NetCDF-файл, нормализует его и вырезает целевой регион."""
         with xr.open_dataset(file_path, engine="netcdf4") as raw_ds:
             return self.normalize_dataset(
                 raw_ds,
@@ -49,7 +41,6 @@ class NetCDFNormalizer:
         lat_bounds: tuple[float, float],
         lon_bounds: tuple[float, float],
     ) -> xr.Dataset | None:
-        """Нормализует xarray.Dataset и возвращает обрезанный фрагмент, загруженный в память."""
         available_vars = [v for v in vars_list if v in ds.data_vars]
         if not available_vars:
             return None
@@ -138,17 +129,14 @@ class NetCDFNormalizer:
         if "lon" not in ds.indexes:
             ds = ds.set_index(lon="lon")
 
-        # Перевод долготы из [0, 360] в [-180, 180]
         if float(ds["lon"].max()) > 180.0:
             ds = ds.assign_coords(lon=(((ds["lon"] + 180.0) % 360.0) - 180.0))
 
-        # Округление в float64 убирает артефакты точности float32 (напр. 25.000002 -> 25.0)
         ds = ds.assign_coords(
             lat=np.round(ds["lat"].values.astype("float64"), self.coord_precision),
             lon=np.round(ds["lon"].values.astype("float64"), self.coord_precision),
         )
 
-        # Строго возрастающий порядок по обеим осям
         ds = ds.sortby("lat").sortby("lon")
         return ds
 

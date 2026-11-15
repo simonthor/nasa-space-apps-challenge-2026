@@ -15,10 +15,6 @@ def build_preview_streaming(
     params: list[str] | None = None,
     coarsen_factor: int = 6,
 ) -> None:
-    """
-    Читает файлы из кэша строго ПО ОДНОМУ, сразу сжимает сетку
-    и собирает легкий preview без загрузки 15 ГБ в RAM.
-    """
     target_params = params or list(DATASET_REGISTRY.keys())
     out_root = Path(output_dir)
     out_root.mkdir(parents=True, exist_ok=True)
@@ -36,13 +32,11 @@ def build_preview_streaming(
 
         for i, fp in enumerate(cached_files, 1):
             with xr.open_dataset(fp) as ds:
-                # 1. Берем только нужные переменные
                 vars_present = [v for v in cfg["vars"] if v in ds.data_vars]
                 if not vars_present:
                     continue
                 ds_sub = ds[vars_present]
 
-                # 2. СРАЗУ сжимаем сетку (уменьшаем объем данных в factor^2 раз)
                 coarsen_dims = {}
                 for lat_name in ("lat", "latitude", "y"):
                     if lat_name in ds_sub.dims:
@@ -54,14 +48,12 @@ def build_preview_streaming(
                 if coarsen_dims:
                     ds_sub = ds_sub.coarsen(coarsen_dims, boundary="trim").mean()
 
-                # 3. Применяем конвертацию единиц и переводим в float32
                 if convert_fn:
                     ds_sub = convert_fn(ds_sub)
 
                 for v in ds_sub.data_vars:
                     ds_sub[v] = ds_sub[v].astype("float32")
 
-                # Загружаем в память ТОЛЬКО маленький сжатый срез (~100 КБ)
                 small_slices.append(ds_sub.load())
 
             if i % 500 == 0:
@@ -71,7 +63,6 @@ def build_preview_streaming(
         if not small_slices:
             continue
 
-        # Теперь в списке лежат сотни крошечных срезов (суммарно ~50-150 МБ вместо 40 ГБ)
         ds_final = xr.concat(small_slices, dim="time").sortby("time")
 
         out_path = out_root / f"{param_key}_preview.nc"
@@ -89,7 +80,6 @@ def build_preview_streaming(
         gc.collect()
 
 
-# В конец prepare_preview.py (или отдельной функцией)
 def build_microplastic_preview(
     cache_root: str = "../../data/.cache_nasa",
     output_dir: str = "../../data/preview",
@@ -107,12 +97,10 @@ def build_microplastic_preview(
         with xr.open_dataset(fp) as ds:
             ds_sub = ds[cfg["vars"]]
 
-            # Сжимаем сетку (0.25° -> 0.5° при factor=2)
             coarsen_dims = {d: coarsen_factor for d in ("lat", "lon") if d in ds_sub.dims}
             if coarsen_dims and coarsen_factor > 1:
                 ds_sub = ds_sub.coarsen(coarsen_dims, boundary="trim").mean()
 
-            # Переводим долготу 0..360 -> -180..180 и сортируем
             if float(ds_sub["lon"].max()) > 180.0:
                 ds_sub = ds_sub.assign_coords(lon=(((ds_sub["lon"] + 180.0) % 360.0) - 180.0)).sortby("lon")
 
@@ -122,11 +110,9 @@ def build_microplastic_preview(
             slices.append(ds_sub.load())
 
     ds_final = xr.concat(slices, dim="time").sortby("time")
-    # Убираем возможные дубликаты дат на стыках месячных файлов
     _, idx = np.unique(ds_final["time"].values, return_index=True)
     ds_final = ds_final.isel(time=np.sort(idx))
 
-    # Опционально: сжать ежедневные шаги в среднемесячные, чтобы слайдер листал месяцы как в остальных слоях
     ds_final = ds_final.resample(time="MS").mean()
 
     out_path = Path(output_dir) / f"{param_key}_preview.nc"

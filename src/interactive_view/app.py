@@ -25,7 +25,6 @@ COLORSCALES = {
 @st.cache_resource
 def load_dataset(nc_path: Path) -> xr.Dataset:
     ds = xr.open_dataset(nc_path)
-    # Унифицируем имена координат (в salinity они latitude/longitude)
     rename_map = {}
     if "latitude" in ds.coords:
         rename_map["latitude"] = "lat"
@@ -52,7 +51,6 @@ def get_slice_df(
 ) -> pd.DataFrame:
     da = ds[var_name].isel(time=time_idx)
 
-    # Прореживаем сетку для плавного WebGL-рендера в браузере
     if stride > 1 and da.sizes["lat"] > 200:
         da = da.isel(lat=slice(None, None, stride), lon=slice(None, None, stride))
 
@@ -86,7 +84,6 @@ def build_globe_figure(
     stride: int = 2,
     use_log: bool = False,
 ) -> go.Figure:
-    # Легкое прореживание сетки (оптимально ~180x360 для WebGL)
     if stride > 1 and da.sizes["lat"] > 180:
         da = da.isel(lat=slice(None, None, stride), lon=slice(None, None, stride))
 
@@ -101,7 +98,6 @@ def build_globe_figure(
     vmax = float(np.nanpercentile(vals, 98))
 
     if projection == "equirectangular":
-        # Плоская карта — быстрый WebGL Heatmap
         fig = go.Figure(
             go.Heatmap(
                 z=vals,
@@ -115,7 +111,6 @@ def build_globe_figure(
             )
         )
 
-        # Контуры регионов на плоской карте
         if geojson_data:
             for feat in geojson_data.get("features", []):
                 coords = feat["geometry"]["coordinates"][0]
@@ -138,7 +133,6 @@ def build_globe_figure(
             plot_bgcolor="rgb(28, 32, 40)",
         )
     else:
-        # 3D Глобус — нативная WebGL-сфера (go.Surface)
         lon_rad = np.deg2rad(lons)
         lat_rad = np.deg2rad(lats)
         lon_grid, lat_grid = np.meshgrid(lon_rad, lat_rad)
@@ -147,7 +141,6 @@ def build_globe_figure(
         y = np.cos(lat_grid) * np.sin(lon_grid)
         z = np.sin(lat_grid)
 
-        # Заменяем NaN (сушу) на отдельное значение или оставляем прозрачность через surfacecolor
         fig = go.Figure(
             go.Surface(
                 x=x,
@@ -163,7 +156,6 @@ def build_globe_figure(
             )
         )
 
-        # Контуры регионов на 3D-сфере (чуть выше радиуса r=1.005, чтобы не сливались)
         if geojson_data:
             r = 1.005
             for feat in geojson_data.get("features", []):
@@ -211,7 +203,6 @@ def main() -> None:
 
     file_map = {f.stem.replace("_preview", ""): f for f in nc_files}
 
-    # --- Боковая панель управления ---
     with st.sidebar:
         st.header("Параметры отображения")
         dataset_key = st.selectbox("Датасет", list(file_map.keys()))
@@ -226,7 +217,6 @@ def main() -> None:
         )
         projection = "orthographic" if view_mode == "3D Глобус" else "equirectangular"
 
-        # Для хлорофилла и отражательной способности логарифмическая шкала дает гораздо больше деталей
         default_log = "chlorophyll" in dataset_key or "reflectance" in dataset_key
         use_log = st.checkbox("Логарифмическая шкала (log10)", value=default_log)
 
@@ -253,7 +243,6 @@ def main() -> None:
     )
     time_idx = time_labels.index(selected_label)
 
-    # --- Основной экран: карта + аналитика региона ---
     col_map, col_stats = st.columns([2.2, 1])
 
     geojson_data = load_geojson(GEOJSON_PATH)
@@ -286,12 +275,10 @@ def main() -> None:
             lons = [c[0] for c in coords]
             lats = [c[1] for c in coords]
 
-            # Вырезаем регион и считаем среднее по времени
             da_reg = ds[var_name].sel(
                 lat=slice(min(lats), max(lats)),
                 lon=slice(min(lons), max(lons)),
             )
-            # Если lat идет от +90 к -90 (в обратном порядке), slice вернет пустоту — переворачиваем
             if da_reg.sizes["lat"] == 0:
                 da_reg = ds[var_name].sel(
                     lat=slice(max(lats), min(lats)),

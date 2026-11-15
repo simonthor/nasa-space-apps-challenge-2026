@@ -17,12 +17,10 @@ class RegionSpec:
 
 
 def parse_geojson_feature(feature: dict[str, Any]) -> RegionSpec:
-    """Превращает один GeoJSON Feature (Polygon) в RegionSpec."""
     geom = feature.get("geometry", {})
     if geom.get("type") != "Polygon":
         raise ValueError(f"Expected Polygon geometry, got {geom.get('type')}")
 
-    # В GeoJSON внешнее кольцо полигона — первый элемент coordinates: [[lon, lat], ...]
     outer_ring = geom["coordinates"][0]
     lons = [float(pt[0]) for pt in outer_ring]
     lats = [float(pt[1]) for pt in outer_ring]
@@ -30,7 +28,6 @@ def parse_geojson_feature(feature: dict[str, Any]) -> RegionSpec:
     min_lon, max_lon = min(lons), max(lons)
     min_lat, max_lat = min(lats), max(lats)
 
-    # Проверяем, является ли полигон точным прямоугольником по осям lat/lon
     unique_pts = {(float(pt[0]), float(pt[1])) for pt in outer_ring}
     expected_corners = {
         (min_lon, min_lat),
@@ -54,7 +51,6 @@ def parse_geojson_feature(feature: dict[str, Any]) -> RegionSpec:
 
 
 def load_geojson_regions(geojson_path: str | Path) -> list[RegionSpec]:
-    """Читает GeoJSON-файл (FeatureCollection или одиночный Feature)."""
     data = json.loads(Path(geojson_path).read_text(encoding="utf-8"))
 
     if data.get("type") == "FeatureCollection":

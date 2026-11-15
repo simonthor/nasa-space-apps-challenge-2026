@@ -31,7 +31,6 @@ def extract_regions_from_cache(
             out_path = Path(output_root) / region.name / f"{param_key}.nc"
             out_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # Собираем метаданные из GeoJSON в атрибуты NetCDF
             netcdf_attrs = {
                 "parameter": param_key,
                 "source_dataset": cfg["short_name"],
@@ -101,7 +100,6 @@ def extract_regions_from_cache_large(
             }
 
             temp_files = []
-            # 1. Обрабатываем и сохраняем каждый год отдельно
             for year in range(start_year, end_year + 1):
                 y_start = max(start_date, f"{year}-01-01") if start_date else f"{year}-01-01"
                 y_end = min(end_date, f"{year}-12-31") if end_date else f"{year}-12-31"
@@ -120,7 +118,6 @@ def extract_regions_from_cache_large(
                     attrs=netcdf_attrs,
                 )
 
-                # Пропускаем год, если любая из координат (time, lat, lon) пустая
                 if any(size == 0 for size in ds_year.sizes.values()):
                     print(f"    [WARN] Empty slice for {region.name} in {year}: sizes={dict(ds_year.sizes)}")
                     ds_year.close()
@@ -140,7 +137,6 @@ def extract_regions_from_cache_large(
                 temp_dir.rmdir()
                 continue
 
-            # 2. Склеиваем только непустые годовые файлы
             with xr.open_mfdataset(
                     temp_files,
                     combine="nested",
@@ -150,7 +146,6 @@ def extract_regions_from_cache_large(
                 ds_full.to_netcdf(out_path)
                 print(f"  -> Saved {out_path} | shape={dict(ds_full.sizes)}")
 
-            # Удаляем временные файлы
             for f in temp_files:
                 f.unlink()
             temp_dir.rmdir()
