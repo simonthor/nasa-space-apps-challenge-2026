@@ -91,7 +91,6 @@ def get_frame_scalars(data_slice: np.ndarray, flat: bool = False) -> np.ndarray:
 
 
 def latlon_to_xyz(lats: np.ndarray, lons: np.ndarray, flat: bool = False, radius: float = 1.003) -> np.ndarray:
-    """Переводит массивы широт/долгот в 3D-координаты сферы (чуть выше поверхности) или плоской карты."""
     if flat:
         return np.column_stack([lons, lats, np.full_like(lons, 0.2, dtype=np.float64)])
 
@@ -104,7 +103,6 @@ def latlon_to_xyz(lats: np.ndarray, lons: np.ndarray, flat: bool = False, radius
 
 
 def create_geojson_borders(geojson_path: Path, flat: bool = False, step_deg: float = 1.0) -> pv.PolyData | None:
-    """Строит PolyData с полилиниями всех полигонов из GeoJSON с дискретизацией по дуге."""
     if not geojson_path.exists():
         print(f"[Warn] GeoJSON not found: {geojson_path}")
         return None

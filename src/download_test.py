@@ -9,7 +9,6 @@ def download(lat_region, lon_region, name:str):
 
     out_file = f"../data/{name}01-25.nc"
 
-    # Загрузчик сам найдет, скачает, нормализует, обрежет и сохранит файл
     ds_sst = downloader.fetch(
         param_key=name,
         start_date="2001-01-01",
@@ -26,7 +25,6 @@ def use_existing(lat_region, lon_region, name:str):
     normalizer = NetCDFNormalizer()
     cfg = DATASET_REGISTRY[name]
 
-    # Берем уже скачанные файлы из кэша
     cached_files = glob(f"../data/.cache_nasa/{name}/*.nc")
     out_file = f"../data/{name}01-25.nc"
 
