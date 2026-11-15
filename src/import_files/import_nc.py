@@ -2,32 +2,6 @@ import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 
-def test_plot():
-    temp_c = xr.open_dataarray("../data/processed/gldas_temp_2001_2025_c.nc")
-
-    # Temperature for regioin
-    weights = np.cos(np.deg2rad(temp_c.lat))
-    regional_mean = temp_c.weighted(weights).mean(dim=["lat", "lon"])
-
-    regional_mean.to_dataframe(name="temp_c").to_csv("regional_temp.csv")
-
-    fig, ax = plt.subplots(figsize=(12, 5))
-
-    regional_mean.plot(ax=ax, label="Monthly values", alpha=0.5, color="steelblue")
-    regional_mean.rolling(time=12, center=True).mean().plot(
-        ax=ax, label="Moving Average (12 m.)", color="darkred", linewidth=2
-    )
-
-    ax.set_title("Average surface temperature in the region (2001–2025)")
-    ax.set_ylabel("Temperature, °C")
-    ax.set_xlabel("Year")
-    ax.grid(True, linestyle="--", alpha=0.6)
-    ax.legend()
-
-    plt.tight_layout()
-    plt.savefig("regional_temp_plot.png", dpi=300)
-    plt.close()
-
 def inspect_nc(file_path):
     """
     Outputs the structure, coordinates, variables, attributes,

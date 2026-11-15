@@ -6,3 +6,4 @@ devenv.lock
 data/skin_temp
 .idea
 .venv/
+data/.cache_nasa
